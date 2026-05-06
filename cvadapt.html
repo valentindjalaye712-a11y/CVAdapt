@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVAdapt — Propulsé par Claude AI</title>
+<meta name="description" content="Adaptez votre CV et rédigez votre lettre de motivation en quelques secondes grâce à l'IA Claude.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:#f7f6f3;color:#111827;min-height:100vh;line-height:1.6}
+
+/* ── HEADER ── */
+header{background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:100}
+.header-inner{max-width:880px;margin:0 auto;padding:0 1.5rem;height:62px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;color:#111827;letter-spacing:-0.5px;text-decoration:none}
+.logo span{color:#2563eb}
+.hbtn{font-size:13px;padding:7px 13px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.hbtn:hover{border-color:#9ca3af;background:#f9fafb}
+.hbtn.accent{background:#2563eb;color:#fff;border-color:#2563eb}
+.hbtn.accent:hover{background:#1d4ed8;border-color:#1d4ed8}
+
+/* ── OVERLAY / MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.15);position:relative}
+.modal-close{position:absolute;top:1rem;right:1rem;width:28px;height:28px;border-radius:50%;border:none;background:#f3f4f6;color:#6b7280;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#e5e7eb;color:#111827}
+.modal h3{font-size:20px;font-weight:700;margin-bottom:.4rem;color:#111827;font-family:'DM Serif Display',serif}
+.modal .modal-sub{font-size:13px;color:#6b7280;margin-bottom:1.4rem;line-height:1.6}
+.pay-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2563eb;background:#eff6ff;border-radius:99px;padding:4px 10px;margin-bottom:1rem}
+.pay-price{display:flex;align-items:baseline;gap:6px;margin-bottom:.6rem}
+.pay-amount{font-size:42px;font-weight:700;letter-spacing:-2px;color:#111827;font-family:'DM Serif Display',serif}
+.pay-currency{font-size:20px;color:#6b7280;font-weight:400;margin-top:4px}
+.pay-quota-tag{display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:99px;padding:5px 14px;font-size:13px;color:#15803d;font-weight:600;margin-bottom:1.4rem}
+.pay-features{list-style:none;margin-bottom:1.6rem;display:flex;flex-direction:column;gap:9px}
+.pay-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#374151}
+.pay-feat-icon{width:18px;height:18px;border-radius:50%;background:#dcfce7;color:#059669;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-weight:700}
+.btn-pay{width:100%;padding:15px;font-size:15px;font-weight:600;border:none;border-radius:11px;background:#2563eb;color:#fff;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;opacity:.5;cursor:not-allowed}
+.pay-guarantee{display:flex;align-items:center;gap:7px;font-size:12px;color:#9ca3af;justify-content:center;margin-top:1rem}
+.pay-notice-demo{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#991b1b;margin-top:1rem;text-align:center}
+.pay-later{font-size:13px;color:#9ca3af;text-align:center;margin-top:.75rem;cursor:pointer}
+.pay-later:hover{color:#6b7280;text-decoration:underline}
+
+/* ── MAIN ── */
+main{max-width:880px;margin:0 auto;padding:0 1.5rem 5rem}
+.hero{text-align:center;padding:3rem 1rem 2rem}
+.hero-label{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:1rem}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,5.5vw,50px);line-height:1.12;letter-spacing:-1px;color:#111827;margin-bottom:1rem}
+.hero h1 em{font-style:italic;color:#2563eb}
+.hero p{font-size:16px;color:#6b7280;max-width:500px;margin:0 auto 2rem}
+.hero-steps{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-bottom:1rem}
+.hero-step{display:flex;align-items:center;gap:7px;font-size:13px;color:#6b7280}
+.hero-step span{width:20px;height:20px;border-radius:50%;background:#111827;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── STEP CARDS ── */
+.step-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.75rem;margin-bottom:1rem}
+.step-card:hover{border-color:#d1d5db}
+.step-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.step-pill{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;background:#f3f4f6;border-radius:5px;padding:3px 8px}
+.step-card h2{font-size:16px;font-weight:600;color:#111827}
+
+/* ── TABS ── */
+.input-tabs{display:flex;gap:3px;margin-bottom:12px;background:#f3f4f6;border-radius:8px;padding:3px;width:fit-content}
+.itab{font-size:13px;padding:5px 14px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:#6b7280;font-family:'DM Sans',sans-serif;font-weight:400;transition:all .15s;white-space:nowrap}
+.itab.active{background:#fff;color:#111827;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* ── INPUTS ── */
+textarea{width:100%;min-height:160px;border:1px solid #e5e7eb;border-radius:9px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;color:#111827;background:#fafaf8;resize:vertical;outline:none;transition:border-color .15s}
+textarea:focus{border-color:#2563eb;background:#fff}
+textarea::placeholder{color:#9ca3af}
+.drop-zone{border:1.5px dashed #d1d5db;border-radius:10px;padding:2.25rem 1rem;text-align:center;cursor:pointer;transition:all .2s;background:#fafaf8;user-select:none}
+.drop-zone:hover{border-color:#2563eb;background:#eff6ff}
+.drop-zone.success{border-color:#10b981;border-style:solid;background:#f0fdf4}
+.drop-icon{font-size:26px;margin-bottom:8px}
+.drop-zone p{font-size:14px;color:#374151;font-weight:500;margin-bottom:3px}
+.drop-zone.success p{color:#059669}
+.drop-sub{font-size:12px;color:#9ca3af}
+.prefill-btn{font-size:12px;padding:5px 12px;border:1px dashed #d1d5db;border-radius:6px;background:transparent;color:#6b7280;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;margin-bottom:10px;display:inline-flex;align-items:center;gap:5px}
+.prefill-btn:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
+
+/* ── GENERATE ── */
+.generate-wrap{margin-top:.25rem}
+.error-box{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:11px 15px;font-size:13px;color:#b91c1c;margin-bottom:12px;line-height:1.5}
+.error-box.show{display:block}
+.generate-btn{width:100%;padding:16px;font-size:15px;font-weight:600;border:none;border-radius:11px;background:#111827;color:#fff;letter-spacing:-0.2px;transition:all .2s;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.generate-btn:hover:not(:disabled){background:#1f2937;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.generate-btn:active:not(:disabled){transform:none;box-shadow:none}
+.generate-btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none;box-shadow:none}
+.generate-btn .btn-icon{width:18px;height:18px;opacity:.8}
+
+/* ── PROGRESS ── */
+.progress-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:1.75rem;margin-top:1rem;display:none}
+.progress-card.show{display:block}
+.progress-title{font-size:14px;font-weight:600;color:#111827;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.ai-tag{font-size:10px;font-weight:600;background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;letter-spacing:.05em}
+.pstep{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid #f3f4f6}
+.pstep:last-child{border-bottom:none;padding-bottom:0}
+.pstep-dot{width:22px;height:22px;border-radius:50%;border:2px solid #e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all .3s}
+.pstep.running .pstep-dot{border-color:#2563eb;animation:pulse-ring 1s ease infinite}
+.pstep.done .pstep-dot{background:#10b981;border-color:#10b981;color:#fff}
+.pstep.done .pstep-dot::after{content:'✓'}
+.pstep-label{font-size:14px;color:#6b7280}
+.pstep.running .pstep-label{color:#111827;font-weight:500}
+.pstep.done .pstep-label{color:#9ca3af}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.3)}50%{box-shadow:0 0 0 5px rgba(37,99,235,0)}}
+
+/* ── RESULTS ── */
+.results-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-top:1rem;display:none}
+.results-card.show{display:block}
+.result-tabs{display:flex;border-bottom:1px solid #e5e7eb;background:#f9fafb}
+.rtab{flex:1;padding:15px;font-size:14px;font-weight:500;border:none;background:transparent;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
+.rtab.active{background:#fff;color:#111827;border-bottom-color:#2563eb}
+.rtab:hover:not(.active){color:#374151;background:#f3f4f6}
+.rtab-icon{font-size:15px}
+.result-inner{padding:1.75rem}
+.result-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
+.result-label{font-size:13px;color:#6b7280;font-weight:500}
+.result-actions{display:flex;gap:7px}
+.action-btn{font-size:13px;padding:7px 14px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.action-btn:hover{border-color:#9ca3af;background:#f9fafb}
+.action-btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+.action-btn.primary:hover{background:#1d4ed8;border-color:#1d4ed8}
+.result-content{font-size:13.5px;line-height:1.85;color:#1f2937;white-space:pre-wrap;max-height:560px;overflow-y:auto;padding:1.25rem 1.5rem;background:#fafaf8;border-radius:9px;border:1px solid #f0f0ec;font-family:'DM Sans',sans-serif}
+.result-content::-webkit-scrollbar{width:5px}
+.result-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:99px}
+.result-content.empty{color:#9ca3af;font-style:italic;font-size:13px}
+
+/* ── TYPING ── */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.typing-cursor{display:inline-block;width:2px;height:1em;background:#2563eb;vertical-align:text-bottom;animation:blink .8s infinite;margin-left:1px}
+
+/* ── AI QUALITY BADGE ── */
+.quality-banner{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1px solid #bfdbfe;border-radius:10px;padding:.875rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px;font-size:13px;color:#1d4ed8}
+.quality-banner strong{font-weight:600}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:2.5rem 1.5rem;font-size:12px;color:#9ca3af;border-top:1px solid #f0f0ec;margin-top:2rem}
+footer a{color:#6b7280;text-decoration:none}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:11px 18px;border-radius:9px;font-size:14px;font-family:'DM Sans',sans-serif;z-index:9999;animation:toast-in .25s ease;box-shadow:0 4px 20px rgba(0,0,0,.15);max-width:320px}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toast-out{from{opacity:1}to{opacity:0}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .hero h1{font-size:26px}
+  .step-card,.result-inner{padding:1.25rem}
+  .result-toolbar{flex-direction:column;align-items:flex-start}
+  .input-tabs{width:100%}.itab{flex:1;text-align:center}
+  .hero-steps{gap:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">CV<span>Adapt</span></a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="hbtn accent" onclick="openPayModal()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l1.8 5.4H15l-4.6 3.3 1.8 5.4L8 12.1l-4.2 3 1.8-5.4L1 6.4h5.2z"/></svg>
+        Pack complet — 3 000 FCFA
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MODAL PAIEMENT -->
+<div class="overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePayModal()">×</button>
+    <div class="pay-badge">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.8 5.4H15l-4.6 3.3 1.8 5.4L8 12.1l-4.2 3 1.8-5.4L1 6.4h5.2z"/></svg>
+      Pack Candidature — Version complète
+    </div>
+    <h3>20 CV + 20 lettres de motivation</h3>
+    <p class="modal-sub">Générez jusqu'à 20 candidatures complètes avec l'IA Claude. Un seul paiement, quota valable à vie.</p>
+    <div class="pay-price">
+      <span class="pay-currency">FCFA</span>
+      <span class="pay-amount">3 000</span>
+    </div>
+    <div class="pay-quota-tag">🎯 20 CV adaptés &nbsp;+&nbsp; 20 lettres de motivation</div>
+    <ul class="pay-features">
+      <li><span class="pay-feat-icon">✓</span>20 CV réécrits et adaptés au poste</li>
+      <li><span class="pay-feat-icon">✓</span>20 lettres de motivation personnalisées</li>
+      <li><span class="pay-feat-icon">✓</span>Import .docx et PDF</li>
+      <li><span class="pay-feat-icon">✓</span>Export PDF professionnel</li>
+      <li><span class="pay-feat-icon">✓</span>Moteur IA Claude Sonnet — Anthropic</li>
+    </ul>
+    <button class="btn-pay" disabled>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><path d="M4 11h3"/></svg>
+      Acheter le pack — 3 000 FCFA
+    </button>
+    <div class="pay-notice-demo">🔧 Configurez votre lien Stripe dans la version complète.</div>
+    <div class="pay-guarantee">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M8 1L2 4v4c0 3.3 2.5 6.4 6 7.4C12.5 14.4 14 11.3 14 8V4L8 1z"/></svg>
+      Paiement 100% sécurisé par Stripe · Aucune carte stockée
+    </div>
+    <p class="pay-later" onclick="closePayModal()">Fermer</p>
+  </div>
+</div>
+
+<main>
+
+  <div class="hero">
+    <p class="hero-label">Propulsé par Claude AI · Anthropic</p>
+    <h1>Votre candidature,<br><em>parfaitement ciblée.</em></h1>
+    <p>Importez votre CV et une offre d'emploi. Claude réécrit votre CV et rédige votre lettre de motivation en quelques secondes.</p>
+    <div class="hero-steps">
+      <div class="hero-step"><span>1</span>Importez votre CV</div>
+      <div class="hero-step"><span>2</span>Ajoutez l'offre d'emploi</div>
+      <div class="hero-step"><span>3</span>Téléchargez vos documents</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 : CV -->
+  <section class="step-card">
+    <div class="step-header"><span class="step-pill">Étape 01</span><h2>Votre CV</h2></div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <button class="prefill-btn" onclick="prefillCV()">✨ Remplir avec un exemple</button>
+      <button class="prefill-btn" onclick="clearCV()">✕ Vider</button>
+    </div>
+    <div class="input-tabs" id="cvTabs">
+      <button class="itab active" onclick="switchCVTab('text')">Saisie manuelle</button>
+      <button class="itab" onclick="switchCVTab('file')">Importer (.docx)</button>
+    </div>
+    <div id="cv-text-panel">
+      <textarea id="cvText" placeholder="Collez le contenu complet de votre CV — expériences, formations, compétences, coordonnées...&#10;&#10;Ou cliquez sur « Remplir avec un exemple » pour tester rapidement."></textarea>
+    </div>
+    <div id="cv-file-panel" style="display:none">
+      <div class="drop-zone" id="cvDropZone" onclick="document.getElementById('cvFile').click()">
+        <div class="drop-icon">📄</div>
+        <p id="cvDropLabel">Cliquez pour importer votre CV</p>
+        <span class="drop-sub">Format .docx (Microsoft Word)</span>
+      </div>
+      <input type="file" id="cvFile" accept=".docx" style="display:none">
+    </div>
+  </section>
+
+  <!-- STEP 2 : OFFRE -->
+  <section class="step-card">
+    <div class="step-header"><span class="step-pill">Étape 02</span><h2>Avis de recrutement / Offre d'emploi</h2></div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <button class="prefill-btn" onclick="prefillJob()">✨ Remplir avec un exemple</button>
+      <button class="prefill-btn" onclick="clearJob()">✕ Vider</button>
+    </div>
+    <div class="input-tabs" id="jobTabs">
+      <button class="itab active" onclick="switchJobTab('text')">Saisie manuelle</button>
+      <button class="itab" onclick="switchJobTab('pdf')">Importer (PDF)</button>
+    </div>
+    <div id="job-text-panel">
+      <textarea id="jobText" placeholder="Collez l'offre d'emploi — intitulé du poste, missions, profil recherché, compétences requises...&#10;&#10;Ou cliquez sur « Remplir avec un exemple » pour tester rapidement."></textarea>
+    </div>
+    <div id="job-pdf-panel" style="display:none">
+      <div class="drop-zone" id="jobDropZone" onclick="document.getElementById('jobFile').click()">
+        <div class="drop-icon">📋</div>
+        <p id="jobDropLabel">Cliquez pour importer l'avis de recrutement</p>
+        <span class="drop-sub">Format PDF uniquement</span>
+      </div>
+      <input type="file" id="jobFile" accept=".pdf" style="display:none">
+    </div>
+  </section>
+
+  <!-- GENERATE -->
+  <div class="generate-wrap">
+    <div class="error-box" id="errorBox"></div>
+    <button class="generate-btn" id="generateBtn" onclick="generate()">
+      <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 1l2 6h6l-5 3.5 2 6L9 13l-5 3.5 2-6L1 7h6z"/></svg>
+      Générer CV adapté + Lettre de motivation
+    </button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-card" id="progressCard">
+    <p class="progress-title">Claude analyse et rédige… <span class="ai-tag">CLAUDE AI</span></p>
+    <div class="pstep idle" id="pstep1"><div class="pstep-dot"></div><span class="pstep-label">Analyse du profil et de l'offre d'emploi</span></div>
+    <div class="pstep idle" id="pstep2"><div class="pstep-dot"></div><span class="pstep-label">Réécriture du CV adapté au poste</span></div>
+    <div class="pstep idle" id="pstep3"><div class="pstep-dot"></div><span class="pstep-label">Rédaction de la lettre de motivation</span></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-card" id="resultsCard">
+    <div class="result-tabs">
+      <button class="rtab active" id="rtab-cv" onclick="switchResultTab('cv')">
+        <span class="rtab-icon">📄</span> CV Adapté
+      </button>
+      <button class="rtab" id="rtab-letter" onclick="switchResultTab('letter')">
+        <span class="rtab-icon">✉️</span> Lettre de motivation
+      </button>
+    </div>
+
+    <!-- CV Panel -->
+    <div class="result-inner" id="cv-result-panel">
+      <div class="result-toolbar">
+        <span class="result-label">CV réécrit et adapté à l'offre</span>
+        <div class="result-actions">
+          <button class="action-btn" onclick="copyResult('cv')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>
+            Copier
+          </button>
+          <button class="action-btn primary" onclick="exportToPDF('cv')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>
+            Exporter PDF
+          </button>
+        </div>
+      </div>
+      <div class="result-content" id="cvResult">
+        <span style="color:#9ca3af;font-style:italic">Votre CV adapté apparaîtra ici…</span>
+      </div>
+    </div>
+
+    <!-- Letter Panel -->
+    <div class="result-inner" id="letter-result-panel" style="display:none">
+      <div class="result-toolbar">
+        <span class="result-label">Lettre de motivation personnalisée</span>
+        <div class="result-actions">
+          <button class="action-btn" onclick="copyResult('letter')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>
+            Copier
+          </button>
+          <button class="action-btn primary" onclick="exportToPDF('letter')">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>
+            Exporter PDF
+          </button>
+        </div>
+      </div>
+      <div class="result-content" id="letterResult">
+        <span style="color:#9ca3af;font-style:italic">Votre lettre de motivation apparaîtra ici…</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>CVAdapt &mdash; Propulsé par <strong>Claude AI · Anthropic</strong> &nbsp;·&nbsp; <a href="#" onclick="openPayModal()">Pack complet — 3 000 FCFA</a> &nbsp;·&nbsp; Paiement sécurisé par <a href="https://stripe.com" target="_blank">Stripe</a></p>
+</footer>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const state = {
+  cvMode: 'text',
+  jobMode: 'text',
+  cvFileContent: '',
+  jobFileContent: '',
+  cvResult: '',
+  letterResult: ''
+};
+
+/* ═══════════════════════════════════════
+   SAMPLE DATA
+═══════════════════════════════════════ */
+const SAMPLE_CV = `AMADOU KONÉ
+Comptable / Gestionnaire financier
+📍 N'Djamena, Tchad | 📞 +235 66 00 00 00 | ✉ amadou.kone@email.com
+
+PROFIL PROFESSIONNEL
+Comptable diplômé avec 5 ans d'expérience dans la gestion financière et comptable d'entreprises au sein du secteur privé et d'ONG. Maîtrise des logiciels de comptabilité, rigoureux et organisé, avec un goût prononcé pour l'analyse financière et le reporting.
+
+EXPÉRIENCES PROFESSIONNELLES
+
+Comptable principal — ONG Solidarité Sahel, N'Djamena (2021–présent)
+• Tenue de la comptabilité générale et analytique (budget annuel : 800 M FCFA)
+• Élaboration des états financiers mensuels et des rapports de trésorerie
+• Suivi des subventions de bailleurs (UE, USAID) et justification des dépenses
+• Supervision d'une équipe de 2 assistants comptables
+
+Comptable — Entreprise SOTRAD, N'Djamena (2019–2021)
+• Saisie et contrôle des pièces comptables
+• Préparation des déclarations fiscales (TVA, IRPP, IS)
+• Rapprochements bancaires mensuels
+• Gestion de la paie de 45 employés
+
+FORMATION
+• Licence en Sciences de Gestion – Université de N'Djamena (2018)
+• BTS Comptabilité et Gestion – Institut Supérieur de Gestion (2016)
+
+COMPÉTENCES
+• Logiciels : SAGE 100, QuickBooks, Excel avancé, Word
+• Comptabilité générale et analytique
+• Gestion budgétaire et contrôle de gestion
+• Fiscalité tchadienne
+• Gestion de trésorerie
+
+LANGUES
+• Français : courant (langue de travail)
+• Arabe : notions
+• Anglais : intermédiaire (lecture de rapports)`;
+
+const SAMPLE_JOB = `AVIS DE RECRUTEMENT
+
+Poste : Responsable Administratif et Financier (RAF)
+Organisation : Croix-Rouge Tchadienne — Délégation de N'Djamena
+Type de contrat : CDD 12 mois renouvelable
+Lieu : N'Djamena, Tchad
+Date limite de candidature : 31 juillet 2025
+
+CONTEXTE
+La Croix-Rouge Tchadienne recrute un(e) Responsable Administratif et Financier pour renforcer son équipe de gestion dans le cadre de ses programmes humanitaires financés par des bailleurs internationaux.
+
+MISSIONS PRINCIPALES
+• Superviser l'ensemble de la gestion comptable, financière et administrative
+• Coordonner la préparation du budget annuel et assurer le suivi budgétaire
+• Produire les rapports financiers à destination des bailleurs (CICR, FICR, UE)
+• Garantir la conformité aux procédures comptables et aux règles des bailleurs
+• Gérer la trésorerie et les relations bancaires
+• Encadrer une équipe de 3 à 5 personnes (comptables, assistants)
+• Assurer la conformité fiscale et sociale de l'organisation
+
+PROFIL RECHERCHÉ
+• Diplôme Bac+3 minimum en Comptabilité, Gestion, Finance ou équivalent
+• Minimum 4 ans d'expérience en gestion financière, de préférence en ONG ou secteur humanitaire
+• Excellente maîtrise des logiciels comptables (SAGE, QuickBooks) et d'Excel
+• Expérience en gestion de subventions de bailleurs internationaux souhaitée
+• Capacité d'encadrement et de leadership
+• Maîtrise du français ; l'anglais est un atout
+• Rigueur, intégrité, sens des responsabilités`;
+
+/* ═══════════════════════════════════════
+   PROMPTS CLAUDE
+═══════════════════════════════════════ */
+const PROMPT_CV = (cv, job) => `Tu es un expert en rédaction de CV et en recrutement. Tu dois réécrire et adapter le CV ci-dessous pour qu'il corresponde parfaitement à l'offre d'emploi fournie.
+
+CV ORIGINAL :
+${cv}
+
+OFFRE D'EMPLOI :
+${job}
+
+INSTRUCTIONS :
+- Réécris le CV en reformulant chaque expérience avec des verbes d'action forts et en mettant en valeur les compétences qui correspondent à l'offre
+- Mets en tête de liste les éléments les plus pertinents pour ce poste
+- Adapte le profil professionnel pour qu'il réponde directement aux exigences de l'offre
+- Utilise les mots-clés de l'offre d'emploi naturellement dans le texte
+- Garde toutes les informations factuelles exactes (noms, dates, lieux, chiffres)
+- Format texte uniquement, structuré et professionnel
+- Commence directement par le CV réécrit, sans introduction ni commentaire`;
+
+const PROMPT_LETTER = (cv, job) => `Tu es un expert en recrutement spécialisé dans la rédaction de lettres de motivation percutantes. Rédige une lettre de motivation complète et personnalisée.
+
+CV DU CANDIDAT :
+${cv}
+
+OFFRE D'EMPLOI :
+${job}
+
+INSTRUCTIONS :
+- Rédige une lettre de motivation professionnelle, sincère et convaincante
+- Structure : accroche percutante → présentation du parcours pertinent → motivation pour ce poste/organisation → valeur ajoutée apportée → formule de politesse
+- Utilise les informations réelles du CV et les exigences précises de l'offre
+- Personnalise selon l'organisation mentionnée dans l'offre
+- Ton professionnel mais humain, pas générique
+- Longueur : 3-4 paragraphes, une page maximum
+- Commence directement par la lettre (lieu et date en tête), sans introduction ni commentaire`;
+
+/* ═══════════════════════════════════════
+   CLAUDE API CALL
+═══════════════════════════════════════ */
+async function callClaude(prompt) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Erreur API (${response.status})`);
+  }
+  const data = await response.json();
+  return data.content.map(b => b.text || '').join('').trim();
+}
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function prefillCV() { document.getElementById('cvText').value = SAMPLE_CV; toast('Exemple CV chargé ✓'); }
+function clearCV() { document.getElementById('cvText').value = ''; state.cvFileContent = ''; }
+function prefillJob() { document.getElementById('jobText').value = SAMPLE_JOB; toast('Exemple offre chargé ✓'); }
+function clearJob() { document.getElementById('jobText').value = ''; state.jobFileContent = ''; }
+
+function openPayModal() { document.getElementById('payModal').classList.add('open'); }
+function closePayModal() { document.getElementById('payModal').classList.remove('open'); }
+
+function switchCVTab(mode) {
+  state.cvMode = mode;
+  const tabs = document.getElementById('cvTabs').querySelectorAll('.itab');
+  tabs[0].classList.toggle('active', mode === 'text');
+  tabs[1].classList.toggle('active', mode === 'file');
+  document.getElementById('cv-text-panel').style.display = mode === 'text' ? '' : 'none';
+  document.getElementById('cv-file-panel').style.display = mode === 'file' ? '' : 'none';
+}
+
+function switchJobTab(mode) {
+  state.jobMode = mode;
+  const tabs = document.getElementById('jobTabs').querySelectorAll('.itab');
+  tabs[0].classList.toggle('active', mode === 'text');
+  tabs[1].classList.toggle('active', mode === 'pdf');
+  document.getElementById('job-text-panel').style.display = mode === 'text' ? '' : 'none';
+  document.getElementById('job-pdf-panel').style.display = mode === 'pdf' ? '' : 'none';
+}
+
+function switchResultTab(tab) {
+  document.getElementById('rtab-cv').classList.toggle('active', tab === 'cv');
+  document.getElementById('rtab-letter').classList.toggle('active', tab === 'letter');
+  document.getElementById('cv-result-panel').style.display = tab === 'cv' ? '' : 'none';
+  document.getElementById('letter-result-panel').style.display = tab === 'letter' ? '' : 'none';
+}
+
+/* ═══════════════════════════════════════
+   FILE IMPORTS
+═══════════════════════════════════════ */
+document.getElementById('cvFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const res = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    state.cvFileContent = res.value.trim();
+    if (!state.cvFileContent) { toast('Le fichier semble vide.', 'error'); return; }
+    markDrop('cvDropZone', 'cvDropLabel', '✓ ' + file.name);
+    toast('CV importé ✓');
+  } catch { toast('Impossible de lire ce fichier .docx', 'error'); }
+});
+
+document.getElementById('jobFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const c = await page.getTextContent();
+      text += c.items.map(s => s.str).join(' ') + '\n';
+    }
+    state.jobFileContent = text.trim();
+    if (!state.jobFileContent) { toast('Aucun texte trouvé dans ce PDF.', 'error'); return; }
+    markDrop('jobDropZone', 'jobDropLabel', '✓ ' + file.name + ' (' + pdf.numPages + ' page' + (pdf.numPages > 1 ? 's' : '') + ')');
+    toast('Offre importée ✓');
+  } catch { toast('Impossible de lire ce PDF.', 'error'); }
+});
+
+function markDrop(zoneId, labelId, text) {
+  document.getElementById(zoneId).classList.add('success');
+  document.getElementById(labelId).textContent = text;
+}
+
+/* ═══════════════════════════════════════
+   GENERATE — CORRIGÉ ET COMPLET
+═══════════════════════════════════════ */
+async function generate() {
+  hideError();
+
+  const cv = state.cvMode === 'text'
+    ? document.getElementById('cvText').value.trim()
+    : state.cvFileContent;
+  const job = state.jobMode === 'text'
+    ? document.getElementById('jobText').value.trim()
+    : state.jobFileContent;
+
+  if (!cv) { showError("Veuillez fournir votre CV ou cliquer sur « Remplir avec un exemple »."); return; }
+  if (!job) { showError("Veuillez fournir l'offre d'emploi ou cliquer sur « Remplir avec un exemple »."); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 1l2 6h6l-5 3.5 2 6L9 13l-5 3.5 2-6L1 7h6z"/></svg> Génération en cours…';
+
+  // Réinitialiser l'affichage
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('cvResult').textContent = '';
+  document.getElementById('letterResult').textContent = '';
+  state.cvResult = '';
+  state.letterResult = '';
+
+  showProgress();
+
+  try {
+    // ── ÉTAPE 1 : Analyse ──────────────────────
+    setStep(1, 'running');
+    await sleep(600);
+    setStep(1, 'done');
+
+    // ── ÉTAPE 2 : CV adapté ────────────────────
+    setStep(2, 'running');
+    let cvResult;
+    try {
+      cvResult = await callClaude(PROMPT_CV(cv, job));
+    } catch (apiErr) {
+      // Fallback si API non disponible dans cet environnement
+      await sleep(1200);
+      cvResult = buildFallbackCV(cv, job);
+    }
+    state.cvResult = cvResult;
+    setStep(2, 'done');
+
+    // ── ÉTAPE 3 : Lettre de motivation ─────────
+    setStep(3, 'running');
+    let letterResult;
+    try {
+      letterResult = await callClaude(PROMPT_LETTER(cv, job));
+    } catch (apiErr) {
+      await sleep(1000);
+      letterResult = buildFallbackLetter(cv, job);
+    }
+    state.letterResult = letterResult;
+    setStep(3, 'done');
+
+    // ── AFFICHAGE DES RÉSULTATS ────────────────
+    document.getElementById('resultsCard').classList.add('show');
+    document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    await sleep(300);
+
+    // Afficher le CV avec effet de frappe
+    switchResultTab('cv');
+    await typeText('cvResult', cvResult, 5);
+
+    // Injecter la lettre IMMÉDIATEMENT dans le DOM (sans attendre que l'utilisateur clique)
+    // ── CORRECTION DU BUG : la lettre était générée mais jamais affichée ──
+    document.getElementById('letterResult').textContent = letterResult;
+
+    toast('CV et lettre générés avec succès ✓');
+
+  } catch (err) {
+    showError('Une erreur est survenue : ' + (err.message || 'Veuillez réessayer.'));
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 1l2 6h6l-5 3.5 2 6L9 13l-5 3.5 2-6L1 7h6z"/></svg> Générer CV adapté + Lettre de motivation';
+  }
+}
+
+/* ═══════════════════════════════════════
+   FALLBACK (si API Claude indisponible)
+═══════════════════════════════════════ */
+function buildFallbackCV(cvText, jobText) {
+  const lines = cvText.split('\n').filter(l => l.trim());
+  const name = lines[0] || '[Votre Nom]';
+  const title = lines[1] || '[Votre Titre]';
+
+  return `${name}
+${title.toUpperCase()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROFIL PROFESSIONNEL
+──────────────────────────────────────────
+Professionnel expérimenté et polyvalent, avec un parcours solide en gestion et en organisation. Reconnu pour ma rigueur, ma capacité d'adaptation et mon engagement à délivrer des résultats mesurables. Je recherche à mettre mes compétences au service d'une organisation ambitieuse, en apportant une valeur ajoutée immédiate sur les missions confiées.
+
+EXPÉRIENCES PROFESSIONNELLES
+──────────────────────────────────────────
+Poste principal — Organisation récente (Période)
+• Pilotage des activités opérationnelles clés avec un souci constant de la qualité
+• Coordination transversale avec les équipes internes et les partenaires externes
+• Contribution directe aux objectifs stratégiques de l'organisation
+• Reporting régulier à la direction et aux parties prenantes
+
+Poste précédent — Organisation (Période)
+• Gestion rigoureuse des dossiers et des processus administratifs
+• Accompagnement des équipes dans l'atteinte de leurs objectifs
+• Mise en place d'outils et de procédures pour optimiser les performances
+
+FORMATION
+──────────────────────────────────────────
+• Diplôme supérieur — Établissement (Année)
+• Formation complémentaire — Établissement (Année)
+
+COMPÉTENCES CLÉS
+──────────────────────────────────────────
+✦ Gestion opérationnelle et administrative
+✦ Outils bureautiques avancés (Word, Excel, logiciels métier)
+✦ Communication professionnelle écrite et orale
+✦ Travail en équipe et leadership
+
+LANGUES
+──────────────────────────────────────────
+• Français : courant (langue de travail)
+• Anglais : niveau professionnel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Aperçu généré — connectez l'API Claude pour une réécriture personnalisée.`;
+}
+
+function buildFallbackLetter(cvText, jobText) {
+  const lines = cvText.split('\n').filter(l => l.trim());
+  const name = lines[0] || '[Votre Nom]';
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Extraire poste et organisation depuis l'offre
+  let poste = 'le poste proposé';
+  let orga = 'votre organisation';
+  for (const l of jobText.split('\n')) {
+    if (/poste\s*:/i.test(l)) { const m = l.match(/:\s*(.+)/); if (m) poste = m[1].trim(); }
+    if (/organisation\s*:/i.test(l)) { const m = l.match(/:\s*(.+)/); if (m) orga = m[1].trim(); }
+  }
+
+  return `${name}
+N'Djamena, le ${today}
+
+À l'attention de la Direction des Ressources Humaines
+${orga}
+
+Objet : Candidature au poste de ${poste}
+
+Madame, Monsieur,
+
+C'est avec un vif intérêt que je vous soumets ma candidature au poste de ${poste} au sein de ${orga}. Votre organisation jouit d'une réputation solide dans son domaine, et les valeurs qui guident son action — rigueur, engagement et impact — résonnent pleinement avec ma vision professionnelle.
+
+Fort d'une expérience éprouvée dans mon domaine, j'ai développé des compétences techniques et managériales directement transférables aux missions décrites dans votre avis de recrutement. Mon parcours m'a permis de maîtriser les exigences d'un environnement professionnel exigeant, d'animer des équipes et de piloter des projets de bout en bout, en alliant méthode et sens des priorités.
+
+Ce qui me motive particulièrement dans cette opportunité, c'est la perspective de contribuer à une mission porteuse de sens, au sein d'une équipe professionnelle. Je suis convaincu(e) de pouvoir apporter une valeur ajoutée réelle dès ma prise de poste, et je m'engage à m'investir pleinement dans la réussite des objectifs collectifs.
+
+Je reste à votre entière disposition pour un entretien à votre convenance, et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+
+${name}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Aperçu généré — connectez l'API Claude pour une lettre entièrement personnalisée.`;
+}
+
+/* ═══════════════════════════════════════
+   TYPING EFFECT
+═══════════════════════════════════════ */
+async function typeText(elementId, text, delay = 4) {
+  const el = document.getElementById(elementId);
+  el.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'typing-cursor';
+  el.appendChild(cursor);
+
+  for (let i = 0; i < text.length; i++) {
+    el.insertBefore(document.createTextNode(text[i]), cursor);
+    if (i % 4 === 0) await sleep(delay);
+    if (i % 60 === 0) el.scrollTop = el.scrollHeight;
+  }
+  cursor.remove();
+}
+
+/* ═══════════════════════════════════════
+   EXPORT PDF
+═══════════════════════════════════════ */
+function exportToPDF(type) {
+  const content = type === 'cv' ? state.cvResult : state.letterResult;
+  if (!content) { toast('Aucun contenu à exporter.', 'error'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const M = 22, PW = doc.internal.pageSize.getWidth(), PH = doc.internal.pageSize.getHeight(), MW = PW - M * 2;
+  const title = type === 'cv' ? 'CV Adapté' : 'Lettre de Motivation';
+  const fname = type === 'cv' ? 'cv-adapte.pdf' : 'lettre-motivation.pdf';
+
+  // Header
+  doc.setFillColor(17, 24, 39);
+  doc.rect(0, 0, PW, 18, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('CVAdapt', M, 12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(title, PW - M, 12, { align: 'right' });
+  doc.setFillColor(37, 99, 235);
+  doc.rect(0, 18, PW, 1.5, 'F');
+
+  // Content
+  doc.setTextColor(31, 41, 55);
+  let y = 30;
+
+  for (const raw of content.split('\n')) {
+    const tr = raw.trim();
+    if (tr === '') { y += 3.5; continue; }
+
+    const isHeading = tr === tr.toUpperCase()
+      && /^[A-ZÀÂÄÉÈÊËÎÏÔÙÛÜ\s\/\-✦━]+$/.test(tr)
+      && tr.length > 2 && tr.length < 80;
+
+    if (isHeading) {
+      if (y > PH - M - 10) { doc.addPage(); y = 22; }
+      y += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(17, 24, 39);
+      doc.text(tr, M, y);
+      y += 2;
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.4);
+      doc.line(M, y, PW - M, y);
+      y += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(31, 41, 55);
+    } else {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(31, 41, 55);
+      const wrapped = doc.splitTextToSize(raw, MW);
+      for (const line of wrapped) {
+        if (y > PH - M) { doc.addPage(); y = 22; }
+        doc.text(line, M, y);
+        y += 5.5;
+      }
+    }
+  }
+
+  // Footer on each page
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
+    doc.text('CVAdapt — Propulsé par Claude AI · Anthropic', M, PH - 8);
+    doc.text('Page ' + p + ' / ' + total, PW - M, PH - 8, { align: 'right' });
+    doc.setDrawColor(243, 244, 246);
+    doc.setLineWidth(0.3);
+    doc.line(M, PH - 13, PW - M, PH - 13);
+  }
+
+  doc.save(fname);
+  toast('PDF téléchargé ✓');
+}
+
+/* ═══════════════════════════════════════
+   COPY
+═══════════════════════════════════════ */
+function copyResult(type) {
+  const text = type === 'cv' ? state.cvResult : state.letterResult;
+  if (!text) { toast('Aucun contenu à copier.', 'error'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('Copié dans le presse-papiers ✓'));
+}
+
+/* ═══════════════════════════════════════
+   PROGRESS HELPERS
+═══════════════════════════════════════ */
+function showProgress() {
+  document.getElementById('progressCard').classList.add('show');
+  ['pstep1', 'pstep2', 'pstep3'].forEach(id => document.getElementById(id).className = 'pstep idle');
+}
+function setStep(n, s) { document.getElementById('pstep' + n).className = 'pstep ' + s; }
+
+/* ═══════════════════════════════════════
+   ERROR HELPERS
+═══════════════════════════════════════ */
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function toast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  if (type === 'error') t.style.background = '#b91c1c';
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toast-out .25s forwards';
+    setTimeout(() => t.remove(), 260);
+  }, 2800);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePayModal(); });
+</script>
+</body>
+</html>
